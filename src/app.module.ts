@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as dotenv from 'dotenv';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UsersModule } from './users/users.module';
+import { databaseConfig } from './config/database';
+
+dotenv.config();
 
 @Module({
-  imports: [],
+  imports: [TypeOrmModule.forRoot(databaseConfig), UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -4,6 +4,9 @@ import { DoubleCsrfConfigOptions } from 'csurf';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,8 +19,6 @@ async function bootstrap() {
       sameSite: 'strict',
     },
     getSecret: () => {
-      // Implement your secret retrieval logic here
-      // For example, you might use a secret key stored in an environment variable
       return process.env.CSRF_SECRET || 'your_default_secret';
     },
   };
@@ -32,6 +33,8 @@ async function bootstrap() {
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
-  await app.listen(process.env.PORT ?? 3000);
+  console.log('Running port', process.env.PORT);
+
+  await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();
