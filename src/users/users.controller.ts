@@ -35,12 +35,12 @@ export class UsersController {
     return this.usersService.healthCheck();
   }
 
-  @Put(':id/update-username')
+  @Put('/update-username/:id')
   updateUsername(@Param('id') id: string, @Body() newUsername: string) {
     return this.usersService.updateUsername(+id, newUsername);
   }
 
-  @Put(':id/change-password')
+  @Put('/change-password/:id')
   changePassword(@Param('id') id: string, @Body() newPassword: string) {
     return this.usersService.changePassword(+id, newPassword);
   }
