@@ -1,7 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
-  // ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { UpdateUsernameDto } from './dto/update-username.dto';
 
 @Injectable()
 export class UsersService {
@@ -62,14 +64,14 @@ export class UsersService {
     }
   }
 
-  async updateUsername(id: number, newUsername: string) {
+  async updateUsername(id: number, newUsername: UpdateUsernameDto) {
     try {
       const user = await this.userRepository.findOne({ where: { id: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      user.username = newUsername;
+      user.username = newUsername.username;
 
       return this.userRepository.save(user);
     } catch (error) {
@@ -77,15 +79,22 @@ export class UsersService {
     }
   }
 
-  async changePassword(id: number, newPassword: string) {
+  async changePassword(
+    id: number,
+    passwords: { oldPassword: string; newPassword: string },
+  ) {
     const user = await this.userRepository.findOne({ where: { id: id } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const match = await bcrypt.compare(passwords.oldPassword, user.password);
+    if (!match) {
+      throw new HttpException('Not Modified', HttpStatus.NOT_MODIFIED);
+    }
+    const hashedNewPassword = await bcrypt.hash(passwords.newPassword, 10);
 
-    user.password = hashedPassword;
+    user.password = hashedNewPassword;
 
     return this.userRepository.save(user);
   }

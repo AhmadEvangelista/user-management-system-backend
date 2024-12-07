@@ -5,15 +5,21 @@ import {
   Body,
   Param,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CsrfGuard } from 'src/csrf/csrf.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUsernameDto } from './dto/update-username.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  healthCheck(): string {
+    return this.usersService.healthCheck();
+  }
 
   @Post()
   @UseGuards(CsrfGuard)
@@ -22,26 +28,26 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(CsrfGuard)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
-  @Get()
-  healthCheck(@Req() req: Request): string {
-    console.log('Request', req.headers);
-    const csrfToken = req.headers['__host-psifi.x-csrf-token'];
-    console.log('csrfToken', csrfToken);
-
-    return this.usersService.healthCheck();
-  }
-
   @Put('/update-username/:id')
-  updateUsername(@Param('id') id: string, @Body() newUsername: string) {
+  @UseGuards(CsrfGuard)
+  updateUsername(
+    @Param('id') id: string,
+    @Body() newUsername: UpdateUsernameDto,
+  ) {
     return this.usersService.updateUsername(+id, newUsername);
   }
 
   @Put('/change-password/:id')
-  changePassword(@Param('id') id: string, @Body() newPassword: string) {
-    return this.usersService.changePassword(+id, newPassword);
+  @UseGuards(CsrfGuard)
+  changePassword(
+    @Param('id') id: string,
+    @Body() passwords: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(+id, passwords);
   }
 }

@@ -20,14 +20,12 @@ async function bootstrap() {
   app.use(helmet());
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('User Management System')
+    .setDescription('User Management System API Documentation')
     .setVersion('1.0')
-    .addTag('cats')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
-  console.log('Running port', process.env.PORT);
 
   await app.listen(process.env.PORT ?? 5000);
 }
