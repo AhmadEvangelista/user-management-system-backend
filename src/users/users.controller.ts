@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CsrfGuard } from 'src/csrf/csrf.guard';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @UseGuards(CsrfGuard)
   register(@Body() createUserDto: CreateUserDto) {
     return this.usersService.register(createUserDto);
   }
@@ -16,7 +27,11 @@ export class UsersController {
   }
 
   @Get()
-  healthCheck(): string {
+  healthCheck(@Req() req: Request): string {
+    console.log('Request', req.headers);
+    const csrfToken = req.headers['__host-psifi.x-csrf-token'];
+    console.log('csrfToken', csrfToken);
+
     return this.usersService.healthCheck();
   }
 

@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  // ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,44 +23,58 @@ export class UsersService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    const existingUser = await this.userRepository.findOne({
-      where: [
-        { email: createUserDto.email },
-        { username: createUserDto.username },
-      ],
-    });
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: [
+          { email: createUserDto.email },
+          { username: createUserDto.username },
+        ],
+      });
 
-    if (existingUser) {
-      throw new Error('Email or username already taken');
+      if (existingUser) {
+        throw new ConflictException('Email or username already taken');
+      }
+
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+      const user = this.userRepository.create({
+        username: createUserDto.username,
+        email: createUserDto.email,
+        password: hashedPassword,
+      });
+
+      return this.userRepository.save(user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    const user = this.userRepository.create({
-      username: createUserDto.username,
-      email: createUserDto.email,
-      password: hashedPassword,
-    });
-
-    return this.userRepository.save(user);
   }
 
   async findOne(id: number) {
-    const user = await this.userRepository.findOne({ where: { id: id } });
-    if (!user) {
-      throw new Error('User not found');
+    try {
+      const user = await this.userRepository.findOne({ where: { id: id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      } else {
+        return user;
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
   async updateUsername(id: number, newUsername: string) {
-    const user = await this.userRepository.findOne({ where: { id: id } });
-    if (!user) {
-      throw new Error('User not found');
+    try {
+      const user = await this.userRepository.findOne({ where: { id: id } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      user.username = newUsername;
+
+      return this.userRepository.save(user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-
-    user.username = newUsername;
-
-    return this.userRepository.save(user);
   }
 
   async changePassword(id: number, newPassword: string) {
