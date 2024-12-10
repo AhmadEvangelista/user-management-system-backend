@@ -1,37 +1,35 @@
 import helmet from 'helmet';
-import { doubleCsrf } from 'csrf-csrf';
-import { DoubleCsrfConfigOptions } from 'csurf';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as dotenv from 'dotenv';
+import * as cookieParser from 'cookie-parser';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: 'http://localhost:3000', // Frontend domain
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders:
+      'Content-Type, Accept, __host-psifi.x-csrf-token, Authorization, __Host-psifi.x-csrf-token',
+    credentials: true, // Allow cookies to be sent in cross-origin requests
+  });
+
   app.use(helmet());
-  const doubleCsrfOptions: DoubleCsrfConfigOptions = {
-    cookie: {
-      key: 'csrf-token',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-    },
-    getSecret: () => {
-      // Implement your secret retrieval logic here
-      // For example, you might use a secret key stored in an environment variable
-      return process.env.CSRF_SECRET || 'your_default_secret';
-    },
-  };
-  const { doubleCsrfProtection } = doubleCsrf(doubleCsrfOptions);
-  app.use(doubleCsrfProtection);
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('User Management System')
+    .setDescription('User Management System API Documentation')
     .setVersion('1.0')
-    .addTag('cats')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
-  await app.listen(process.env.PORT ?? 3000);
+
+  await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();
