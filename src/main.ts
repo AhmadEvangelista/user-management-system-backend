@@ -13,7 +13,10 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: 'localhost:3000', // Frontend domain
+    origin: 'http://localhost:3000', // Frontend domain
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders:
+      'Content-Type, Accept, __host-psifi.x-csrf-token, Authorization, __Host-psifi.x-csrf-token',
     credentials: true, // Allow cookies to be sent in cross-origin requests
   });
 
