@@ -38,7 +38,7 @@ export class UsersController {
     return this.usersService.updateUserDetails(+id, newUserDetails);
   }
 
-  @Put('/change-password/:id')
+  @Patch('/change-password/:id')
   @UseGuards(CsrfGuard)
   @UseGuards(AuthGuard('jwt'))
   changePassword(
