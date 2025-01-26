@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { UpdateUsernameDto } from './dto/update-username.dto';
+import { UpdateUserDetailsDto } from './dto/update-user-details.dto';
 
 @Injectable()
 export class UsersService {
@@ -35,15 +35,24 @@ export class UsersService {
     }
   }
 
-  async updateUsername(id: number, newUsername: UpdateUsernameDto) {
+  async updateUserDetails(id: number, newUserDetails: UpdateUserDetailsDto) {
     try {
       const user = await this.userRepository.findOne({ where: { id: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      user.username = newUsername.username;
+      console.log('newUserDetails', newUserDetails);
 
+      // Dynamically update the fields
+      if (newUserDetails.username) {
+        user.username = newUserDetails.username;
+      }
+      if (newUserDetails.email) {
+        user.email = newUserDetails.email;
+      }
+
+      // Save the updated user entity (including the ID)
       return this.userRepository.save(user);
     } catch (error) {
       throw new BadRequestException(error.message);
