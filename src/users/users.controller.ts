@@ -1,8 +1,16 @@
-import { Controller, Get, Body, Param, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Param,
+  Put,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CsrfGuard } from 'src/csrf/csrf.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { UpdateUsernameDto } from './dto/update-username.dto';
+import { UpdateUserDetailsDto } from './dto/update-user-details.dto';
 import { AuthGuard } from '@nestjs/passport';
 @Controller('users')
 export class UsersController {
@@ -20,14 +28,14 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  @Put('/update-username/:id')
+  @Patch('/update-user-details/:id')
   @UseGuards(CsrfGuard)
   @UseGuards(AuthGuard('jwt'))
   updateUsername(
     @Param('id') id: string,
-    @Body() newUsername: UpdateUsernameDto,
+    @Body() newUserDetails: UpdateUserDetailsDto,
   ) {
-    return this.usersService.updateUsername(+id, newUsername);
+    return this.usersService.updateUserDetails(+id, newUserDetails);
   }
 
   @Put('/change-password/:id')
